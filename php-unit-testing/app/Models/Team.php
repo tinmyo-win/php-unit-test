@@ -61,12 +61,17 @@ class Team extends Model
         return $this->members()->count();
     }
 
+    public function maximumSize()
+    {
+        return $this->size;
+    }
+
     protected function guardAgainstTooManyMember($users)
     {
         $numUsersToAdd = ($users instanceof User) ? 1 : $users->count();
         $newTeamCount = $this->count() + $numUsersToAdd;
 
-        if ($newTeamCount > $this->size) {
+        if ($newTeamCount > $this->maximumSize()) {
             throw new Exception();
         }
     }
