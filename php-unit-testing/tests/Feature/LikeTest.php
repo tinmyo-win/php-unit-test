@@ -10,75 +10,63 @@ use Tests\TestCase;
 
 class LikeTest extends TestCase
 {
+
+    protected $post;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->post = Post::factory()->create();
+        $this->signIn();
+    }
     /** @test */
     public function a_user_can_like_a_post()
     {
-        $post = Post::factory()->create();
-
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $post->like();
+        $this->post->like();
 
         $this->assertDatabaseHas('likes', [
-            'user_id' =>  $user->id,
-            'likeable_id' => $post->id,
-            'likeable_type' => get_class($post),
+            'user_id' =>  $this->user->id,
+            'likeable_id' => $this->post->id,
+            'likeable_type' => get_class($this->post),
         ]);
 
-        $this->assertTrue($post->isLiked());
+        $this->assertTrue($this->post->isLiked());
     }
 
     /** @test */
     public function a_user_can_unlike_a_post()
     {
-        $post = Post::factory()->create();
-
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $post->like();
-        $post->unlike();
+        $this->post->like();
+        $this->post->unlike();
 
         $this->assertDatabaseMissing('likes', [
-            'user_id' =>  $user->id,
-            'likeable_id' => $post->id,
-            'likeable_type' => get_class($post),
+            'user_id' =>  $this->user->id,
+            'likeable_id' => $this->post->id,
+            'likeable_type' => get_class($this->post),
         ]);
 
-        $this->assertFalse($post->isLiked());
+        $this->assertFalse($this->post->isLiked());
     }
 
     /** @test */
     public function a_user_may_toggle_a_post_like_status()
     {
-        $post = Post::factory()->create();
 
-        $user = User::factory()->create();
+        $this->post->toggle();
 
-        $this->actingAs($user);
+        $this->assertTrue($this->post->isLiked());
 
-        $post->toggle();
-
-        $this->assertTrue($post->isLiked());
-
-        $post->toggle();
-        $this->assertFalse($post->isLiked());
+        $this->post->toggle();
+        $this->assertFalse($this->post->isLiked());
     }
 
     /** @test */
     public function a_post_may_know_how_many_likes_they_got()
     {
-        $post = Post::factory()->create();
 
-        $user = User::factory()->create();
+        $this->post->like();
 
-        $this->actingAs($user);
-
-        $post->like();
-
-        $this->assertEquals(1, $post->likesCount);
+        $this->assertEquals(1, $this->post->likesCount);
     }
 }
